@@ -1,66 +1,43 @@
 import java.util.*;
 
-import static java.lang.Math.abs;
 import static java.lang.Math.sqrt;
 
 public class Main
 {
     public static ArrayList<Color> colors = new ArrayList<>();
-    public static ArrayList<Board> boards = new ArrayList<>();
 
-    public static boolean keepGoing = true;
+    public static final int[][] starting = {{1, 0, 0, 0, 0}, {0, 0, 0, 3, 1}, {3, 2, 0, 0, 2}, {0, 0, 0, 4, 5}, {4, 5, 0, 0, 0}};
+    //public static final int[][] starting = {{0, 1, 2, 0, 0, 3}, {0, 0, 0, 0, 0, 0}, {0, 0, 4, 5, 0, 3}, {0, 0, 0, 6, 0, 2}, {0, 5, 4, 0, 6, 1}, {0, 0, 0, 0, 0, 0}};
 
-    //public static DefaultBoard db = new DefaultBoard(5, 5, 5);
-
-    // TODO
-    // TODO: Store each state of the board as a different item in an Arraylist of maps
-    // TODO: That way static can still remain constant but the values can be changed and appended
-
-    //public static final int[][] starting = {{1, 0, 0, 0, 0}, {0, 0, 0, 3, 1}, {3, 2, 0, 0, 2}, {0, 0, 0, 4, 5}, {4, 5, 0, 0, 0}};
-    public static final int[][] starting = {{0, 1, 2, 0, 0, 3}, {0, 0, 0, 0, 0, 0}, {0, 0, 4, 5, 0, 3}, {0, 0, 0, 6, 0, 2}, {0, 5, 4, 0, 6, 1}, {0, 0, 0, 0, 0, 0}};
-
-    public static int[][] working = new int[6][6];
+    public static int[][] working = new int[5][5];
 
     public static int iteration = 0;
 
     public static void main(String [] args)
     {
-        Board board = new Board(6, 6, 6);
-
-        //db.setOriginal(fillDefaultBoard(board));
-        Board.printBoard(board);
         colors = scanColor(starting);
+        Board board = new Board(starting.length, starting[0].length, colors.size());
         Queue queue = new Queue(colors.get(0).start_x, colors.get(0).start_y);
-        queue = setLatestDirection(queue, possibleDirections(board, queue.q.get(0)));
+        setLatestDirection(queue, possibleDirections(board, queue.q.get(0)));
 
-        // Start
         System.out.println(colors);
 
+        // Start
         int [][] st = deepCopy(starting);
+        Board.printBoard(st);
         while (!queue.done) {
             st = search(st, queue);
+            iteration++;
         }
-
+        System.out.println(queue.toString());
+        Board.printBoard(st);
     }
 
-    public static Queue setLatestDirection(Queue queue, int direction)
+    public static void setLatestDirection(Queue queue, int direction)
     {
-        Node latestNode = queue.q.get(queue.q.size() - 1);
-        queue.q.remove(queue.q.size() - 1);
-        latestNode.dir = direction;
-        queue.q.add(latestNode);
-        return queue;
+        queue.q.get(queue.q.size() - 1).dir = direction;
     }
 
-    public static int[][] deepCopy(int [][] b) {
-        int[][] a = new int[b.length][b[0].length];
-        for (int i = 0; i < a.length; i++) {
-            a[i] = Arrays.copyOf(b[i], b[i].length);
-        }
-        return a;
-    }
-
-    // TODO
     public static int[][] search(int [][] st, Queue queue)
     {
         // COMMENT: Also maybe order colors to try by how far apart they are from each other
@@ -144,7 +121,7 @@ public class Main
     }
 
     // Travel along that direction (analogous to play())
-    public static Queue pursue(Board board, Queue queue, int direction)
+    public static void pursue(Board board, Queue queue, int direction)
     {
         int x = queue.q.get(queue.q.size() - 1).x;
         int y = queue.q.get(queue.q.size() - 1).y;
@@ -174,7 +151,6 @@ public class Main
         n.dir = possibleDirections(board, n);
 
         queue.q.add(n);
-        return queue;
     }
 
     // Checks if node is near end point
@@ -183,9 +159,7 @@ public class Main
         // Compare adjacent squares to end points of respective color
 
         // This would be smart except I also need to know what direction to go in
-        if (distance(n, colors.get(n.color - 1).end_x, colors.get(n.color - 1).end_y) < sqrt(2))
-            // Then end node is adjacent
-            ;
+        //if (distance(n, colors.get(n.color - 1).end_x, colors.get(n.color - 1).end_y) < sqrt(2));
 
         int target_x = colors.get(n.color - 1).end_x;
         int target_y = colors.get(n.color - 1).end_y;
@@ -211,7 +185,7 @@ public class Main
         return 0;
     }
 
-    public static Queue backtrack(Queue queue)
+    public static void backtrack(Queue queue)
     {
         Node latestNode = queue.q.remove(queue.q.size() - 1);
         // Make sure to delete latest node to be able to override it
@@ -222,43 +196,32 @@ public class Main
         {
             if (latestNode.start)
                 queue.q.get(queue.q.size() - 2).banned_dir += latestNode.came_from;
-            // TODO: Need to fix all of the static and deep copying issues
-            // TODO: Make sure to recalculate where the previous node can now go
             Node latestNode2 = queue.q.remove(queue.q.size() - 1);
-            //queue.q.remove(queue.q.size() - 1);
 
             if (latestNode2.dir >= 8)
                 latestNode2.banned_dir += 8;
-
             else if (latestNode2.dir >= 4)
                 latestNode2.banned_dir += 4;
-
             else if (latestNode2.dir >= 2)
                 latestNode2.banned_dir += 2;
-
             else if (latestNode2.dir >= 1)
                 latestNode2.banned_dir += 1;
 
             queue.q.add(latestNode2);
 
-            return queue;
+            return;
         }
-
         if (latestNode.dir >= 8) // Right
             latestNode.dir -= 8;
-
         else if (latestNode.dir >= 4)
             latestNode.dir -= 4;
-
         else if (latestNode.dir >= 2)
             latestNode.dir -= 2;
-
-        else if (latestNode.dir >= 1)
+        else
             latestNode.dir -= 1;
 
         // get rid of attempted direction and add Node back without it
         queue.q.add(latestNode);
-        return queue;
     }
 
     public static int possibleDirections(Board board, Node n)
@@ -267,8 +230,6 @@ public class Main
         int y = n.y;
 
         int directions = 0;
-        //if (n.dir == -1)
-        //    System.out.println("uh oh ");
 
         int temp_banned = n.banned_dir;
 
@@ -295,19 +256,6 @@ public class Main
                 directions += 1;
 
         return directions;
-    }
-
-    public static Node stripDirection(Node n, int d)
-    {
-        if (n.dir >= d)
-        {
-            n.dir -= d;
-        }
-        else
-        {
-            System.out.println("ERROR: Node trying to get rid of a direction it doesn't have");
-        }
-        return n;
     }
 
     // Fills the board with the default values
@@ -364,14 +312,20 @@ public class Main
         return distance(n1, n2.x, n2.y);
     }
 
+    // TODO: apply heuristics
     public static double distance(Node n1, int x, int y)
     {
-        double n1_x = (double)n1.x;
-        double n1_y = (double)n1.y;
+        double n1_x = n1.x;
+        double n1_y = n1.y;
 
-        double n2_x = (double)x;
-        double n2_y = (double)y;
+        return sqrt(((n1_x - x) * (n1_x - x)) + ((n1_y - y) * (n1_y - y)));
+    }
 
-        return sqrt(((n1_x - n2_x) * (n1_x - n2_x)) + ((n1_y - n2_y) * (n1_y - n2_y)));
+    public static int[][] deepCopy(int [][] b) {
+        int[][] a = new int[b.length][b[0].length];
+        for (int i = 0; i < a.length; i++) {
+            a[i] = Arrays.copyOf(b[i], b[i].length);
+        }
+        return a;
     }
 }

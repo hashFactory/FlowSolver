@@ -7,11 +7,6 @@ public class Queue
     public ArrayList<Node> q = new ArrayList<>();
     public boolean done = false;
 
-    /*public Queue()
-    {
-
-    }*/
-
     // Constructor for queue where we specify the starting x and y
     public Queue(int start_x, int start_y)
     {
