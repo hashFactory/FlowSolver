@@ -62,9 +62,9 @@ public class Board
         {
             for (int j = 0; j < board.width; j++)
             {
-                System.out.print(board.b[j][i] + "\t");
+                System.out.print(board.b[j][i] + " ");
             }
-            System.out.println("\n");
+            System.out.println();
         }
         System.out.println("\n");
     }

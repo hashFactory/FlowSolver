@@ -5,6 +5,7 @@ public class Queue
 {
     // Contains queue of nodes that we'll be going through
     public ArrayList<Node> q = new ArrayList<>();
+    public boolean done = false;
 
     /*public Queue()
     {

@@ -8,6 +8,7 @@ public class Node
     public int x = -1;
     public int y = -1;
 
+    public int came_from = -1;
     public int dir = -1;
     public int banned_dir = 0;
 
